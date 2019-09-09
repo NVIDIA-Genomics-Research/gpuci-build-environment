@@ -17,4 +17,4 @@ ARG PYTHON_VERSION=3.6
 FROM gpuci/rapidsai-base:cuda${CUDA_VERSION}-${LINUX_VERSION}-gcc${CC_VERSION}-py${PYTHON_VERSION}
 
 # Install custom packages
-yum -y install rpm-build
+RUN yum -y install rpm-build
