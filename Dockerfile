@@ -8,20 +8,23 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 #
 
-ARG CUDA_VERSION=10.0
-ARG LINUX_VERSION=centos7
-ARG CC_VERSION=7
-ARG CXX_VERSION=7
+ARG CUDA_VERSION=9.2
+ARG LINUX_VERSION=ubuntu16.04
+ARG CC_VERSION=5
+ARG CXX_VERSION=5
 ARG PYTHON_VERSION=3.6
 
 FROM gpuci/rapidsai-base:cuda${CUDA_VERSION}-${LINUX_VERSION}-gcc${CC_VERSION}-py${PYTHON_VERSION}
 
-# Install custom packages
-RUN yum -y install rpm-build \
-        zlib-devel \
-        bzip2-devel \
-        xz-devel \
-        libcurl-devel
+# Install htslib dependencies
+RUN apt-get update
+RUN apt-get install -y tabix \
+        zlib1g-dev \
+        libbz2-dev \
+        liblzma-dev \
+        libcurl4-gnutls-dev
 
 # Install htslib
 RUN git clone --recursive https://github.com/samtools/htslib && cd htslib && make -j16 install
+
+
