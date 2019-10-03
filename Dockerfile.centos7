@@ -21,7 +21,8 @@ RUN yum -y install rpm-build \
         zlib-devel \
         bzip2-devel \
         xz-devel \
-        libcurl-devel
+        libcurl-devel \
+        wget
 
 # Install htslib
-RUN git clone --recursive https://github.com/samtools/htslib && cd htslib && make -j16 install
+RUN wget https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2 && tar xvf htslib-1.9.tar.bz2 && cd htslib-1.9 && ./configure && make -j16 install
