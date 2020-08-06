@@ -23,7 +23,8 @@ RUN apt-get install -y tabix \
         libbz2-dev \
         liblzma-dev \
         libcurl4-gnutls-dev \
-        wget
+        wget \
+        libssl-dev      # VariantWorks `cyvcf2` dependency
 
 # Install htslib
 RUN wget https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2 && tar xvf htslib-1.9.tar.bz2 && cd htslib-1.9 && ./configure && make -j16 install
