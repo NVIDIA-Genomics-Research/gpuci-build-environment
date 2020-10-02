@@ -9,17 +9,16 @@
 #
 
 ARG FROM_IMAGE=gpuci/miniconda-cuda
-ARG CUDA_VERSION=10.1 
+ARG CUDA_VER=10.1 
 ARG LINUX_VERSION=ubuntu18.04
 ARG CC_VERSION=7
-ARG IMAGE_TYPE=base
+ARG IMAGE_TYPE=devel
 ARG PYTHON_VERSION=3.6
 
-FROM ${FROM_IMAGE}:${CUDA_VERSION}-${IMAGE_TYPE}-${LINUX_VERSION}
+FROM ${FROM_IMAGE}:${CUDA_VER}-${IMAGE_TYPE}-${LINUX_VERSION}
 
 # Capture argument used for FROM
 ARG CC_VERSION
-ARG CUDA_VERSION
 ARG PYTHON_VERSION
 
 # Update environment for gcc/g++ builds
@@ -28,15 +27,31 @@ ENV CXX=/usr/bin/g++
 ENV CUDAHOSTCXX=/usr/bin/g++
 ENV CUDA_HOME=/usr/local/cuda
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/lib
+
 # Enables "source activate conda"
 SHELL ["/bin/bash", "-c"]
 
-# Install gcc version
-RUN apt update && apt-get -y install g++-${CC_VERSION} gcc-${CC_VERSION} vim cmake make 
+RUN apt update && \
+    apt-get -y install  vim \
+    # Install gcc version
+    g++-${CC_VERSION} \
+    gcc-${CC_VERSION} \
+    cmake \
+    make \
+    # Install the packages needed to build with.
+    # Install htslib dependencies
+    tabix \
+    zlib1g-dev \
+    libbz2-dev \
+    liblzma-dev \
+    libcurl4-gnutls-dev \
+    wget \
+    # VariantWorks `cyvcf2` dependency
+    libssl-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+    
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${CC_VERSION} 1000 --slave /usr/bin/g++ g++ /usr/bin/g++-${CC_VERSION}
-
-# Installing cuda
-RUN apt update && apt-get -y install cuda-toolkit-$(echo "${CUDA_VERSION}" | sed -e "s/\./-/g" | cut -d- -f1-2)
 
 # Add a condarc for channels and override settings
 RUN echo -e "\
@@ -62,26 +77,20 @@ RUN source activate base \
       "setuptools<50" \
     && sed -i 's/conda activate base/conda activate rapids/g' ~/.bashrc ;
 
-# Install the packages needed to build with.
-# Install htslib dependencies
-RUN apt-get install -y tabix \
-        zlib1g-dev \
-        libbz2-dev \
-        liblzma-dev \
-        libcurl4-gnutls-dev \
-        wget \
-        libssl-dev      # VariantWorks `cyvcf2` dependency
-
 # Install htslib
-RUN wget https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2 && tar xvf htslib-1.9.tar.bz2 && cd htslib-1.9 && ./configure && make -j16 install
+RUN wget https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2 \
+    && tar xvf htslib-1.9.tar.bz2 \
+    && rm -rf htslib-1.9.tar.bz2 \
+    && cd htslib-1.9 \
+    && ./configure \
+    && make -j16 install
 
 # ADD source dest
 # Create symlink for old scripts expecting `gdf` conda env
 RUN ln -s /opt/conda/envs/rapids /opt/conda/envs/gdf
 
 # Clean up pkgs to reduce image size
-RUN conda clean -afy \
-    && chmod -R ugo+w /opt/conda
+RUN conda clean -afy && chmod -R ugo+w /opt/conda
 
 ENTRYPOINT [ "/usr/bin/tini", "--" ]
 CMD [ "/bin/bash" ]
