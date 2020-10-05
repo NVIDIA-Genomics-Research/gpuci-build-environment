@@ -56,19 +56,21 @@ channels: \n\
   - defaults \n" > /conda/.condarc \
       && cat /conda/.condarc ;
 
-# Create `rapids` conda env and make default
+# Create `parabricks` conda env and make default
 RUN source activate base \
     && conda install -y gpuci-tools \
-    && gpuci_conda_retry create --no-default-packages --override-channels -n rapids \
+    && gpuci_conda_retry create --no-default-packages --override-channels -n parabricks \
       -c nvidia \
       -c conda-forge \
       -c defaults \
       -c gpuci \
+      -c bioconda \
       git \
       gpuci-tools \
+      htslib \
       python=${PYTHON_VER} \
       "setuptools<50" \
-    && sed -i 's/conda activate base/conda activate rapids/g' ~/.bashrc
+    && sed -i 's/conda activate base/conda activate parabricks/g' ~/.bashrc
 
 # Install gcc7 from prebuilt tarball
 RUN gpuci_retry wget --quiet ${CENTOS7_GCC7_URL} -O /gcc7.tgz \
@@ -84,16 +86,8 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.3/cmake-3.18.3
     && make -j16 \
     && make install
 
-# Install htslib
-RUN wget https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2 \
-    && tar xvf htslib-1.9.tar.bz2 \
-    && rm -rf htslib-1.9.tar.bz2 \
-    && cd htslib-1.9 \
-    && ./configure \
-    && make -j16 install
-
 # Create symlink for old scripts expecting `gdf` conda env
-RUN ln -s /opt/conda/envs/rapids /opt/conda/envs/gdf
+RUN ln -s /opt/conda/envs/parabricks /opt/conda/envs/gdf
 
 # Clean up pkgs to reduce image size and chmod for all users
 RUN conda clean -afy \

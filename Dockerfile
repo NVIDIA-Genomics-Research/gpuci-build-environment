@@ -11,15 +11,13 @@
 ARG FROM_IMAGE=gpuci/miniconda-cuda
 ARG CUDA_VER=10.1 
 ARG LINUX_VERSION=ubuntu18.04
-ARG CC_VERSION=7
 ARG IMAGE_TYPE=devel
-ARG PYTHON_VERSION=3.6
 
 FROM ${FROM_IMAGE}:${CUDA_VER}-${IMAGE_TYPE}-${LINUX_VERSION}
 
 # Capture argument used for FROM
-ARG CC_VERSION
-ARG PYTHON_VERSION
+ARG CC_VERSION=7
+ARG PYTHON_VERSION=3.6
 
 # Update environment for gcc/g++ builds
 ENV CC=/usr/bin/gcc
@@ -40,12 +38,12 @@ RUN apt update && \
     make \
     # Install the packages needed to build with.
     # Install htslib dependencies
+    wget \
     tabix \
     zlib1g-dev \
     libbz2-dev \
     liblzma-dev \
     libcurl4-gnutls-dev \
-    wget \
     # VariantWorks `cyvcf2` dependency
     libssl-dev \
     && apt-get clean \
@@ -63,31 +61,25 @@ channels: \n\
   - defaults \n" > /conda/.condarc \
       && cat /conda/.condarc ;
 
-# Create rapids conda env and make default
+# Create parabricks conda env and make default
 RUN source activate base \
     && conda install -y gpuci-tools \
-    && gpuci_conda_retry create --no-default-packages --override-channels -n rapids \
+    && gpuci_conda_retry create --no-default-packages --override-channels -n parabricks \
       -c nvidia \
       -c conda-forge \
       -c defaults \
       -c gpuci \
+      -c bioconda \
       git \
       gpuci-tools \
+      htslib \
       python=${PYTHON_VERSION} \
       "setuptools<50" \
-    && sed -i 's/conda activate base/conda activate rapids/g' ~/.bashrc ;
-
-# Install htslib
-RUN wget https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2 \
-    && tar xvf htslib-1.9.tar.bz2 \
-    && rm -rf htslib-1.9.tar.bz2 \
-    && cd htslib-1.9 \
-    && ./configure \
-    && make -j16 install
+    && sed -i 's/conda activate base/conda activate parabricks/g' ~/.bashrc ;
 
 # ADD source dest
 # Create symlink for old scripts expecting `gdf` conda env
-RUN ln -s /opt/conda/envs/rapids /opt/conda/envs/gdf
+RUN ln -s /opt/conda/envs/parabricks /opt/conda/envs/gdf
 
 # Clean up pkgs to reduce image size
 RUN conda clean -afy && chmod -R ugo+w /opt/conda
