@@ -8,22 +8,96 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 #
 
-ARG CUDA_VERSION=10.0
-ARG LINUX_VERSION=centos7
-ARG CC_VERSION=7
-ARG CXX_VERSION=7
-ARG PYTHON_VERSION=3.6
+ARG FROM_IMAGE=gpuci/miniconda-cuda
+ARG CUDA_VER=10.0
+ARG IMAGE_TYPE=devel
+FROM ${FROM_IMAGE}:${CUDA_VER}-${IMAGE_TYPE}-centos7
 
-FROM gpuci/rapidsai-base:cuda${CUDA_VERSION}-${LINUX_VERSION}-gcc${CC_VERSION}-py${PYTHON_VERSION}
+# Capture arguments used for FROM
+ARG CUDA_VER
+
+ARG CC_VERSION=7
+ARG PYTHON_VERSION=3.6
+ARG CENTOS7_GCC7_URL=https://gpuci.s3.us-east-2.amazonaws.com/builds/gcc7.tgz
+
+# Update environment for gcc/g++ builds
+ENV GCC7_DIR=/usr/local/gcc7
+ENV CC=${GCC7_DIR}/bin/gcc
+ENV CXX=${GCC7_DIR}/bin/g++
+ENV CUDAHOSTCXX=${GCC7_DIR}/bin/g++
+ENV CUDA_HOME=/usr/local/cuda
+ENV LD_LIBRARY_PATH=${GCC7_DIR}/lib64:$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/lib
+ENV PATH=${GCC7_DIR}/bin:$PATH
+
+# Enables "source activate conda"
+SHELL ["/bin/bash", "-c"]
 
 # Install custom packages
 RUN yum -y install rpm-build \
+        screen \
+        vim \
         zlib-devel \
         bzip2-devel \
         xz-devel \
         libcurl-devel \
         wget \
-        libssl-dev      # VariantWorks `cyvcf2` dependency
+        # VariantWorks `cyvcf2` dependency
+        libssl-dev \
+        # cmake3 dependency
+        openssl-devel
+
+# Add a condarc for channels and override settings
+RUN echo -e "\
+ssl_verify: False \n\
+channels: \n\
+  - gpuci \n\
+  - conda-forge \n\
+  - nvidia \n\
+  - defaults \n" > /conda/.condarc \
+      && cat /conda/.condarc ;
+
+# Create `rapids` conda env and make default
+RUN source activate base \
+    && conda install -y gpuci-tools \
+    && gpuci_conda_retry create --no-default-packages --override-channels -n rapids \
+      -c nvidia \
+      -c conda-forge \
+      -c defaults \
+      -c gpuci \
+      git \
+      gpuci-tools \
+      python=${PYTHON_VER} \
+      "setuptools<50" \
+    && sed -i 's/conda activate base/conda activate rapids/g' ~/.bashrc
+
+# Install gcc7 from prebuilt tarball
+RUN gpuci_retry wget --quiet ${CENTOS7_GCC7_URL} -O /gcc7.tgz \
+    && tar xzvf /gcc7.tgz \
+    && rm -f /gcc7.tgz
+
+# Install cmake3
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.3/cmake-3.18.3.tar.gz \
+    && tar zxvf cmake-3.* \
+    && rm -rf cmake-3*.tar.gz \
+    && cd cmake-3.* \
+    && ./bootstrap --prefix=/usr/local \
+    && make -j16 \
+    && make install
 
 # Install htslib
-RUN wget https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2 && tar xvf htslib-1.9.tar.bz2 && cd htslib-1.9 && ./configure && make -j16 install
+RUN wget https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2 \
+    && tar xvf htslib-1.9.tar.bz2 \
+    && rm -rf htslib-1.9.tar.bz2 \
+    && cd htslib-1.9 \
+    && ./configure \
+    && make -j16 install
+
+# Create symlink for old scripts expecting `gdf` conda env
+RUN ln -s /opt/conda/envs/rapids /opt/conda/envs/gdf
+
+# Clean up pkgs to reduce image size and chmod for all users
+RUN conda clean -afy \
+    && chmod -R ugo+w /opt/conda
+
+ENTRYPOINT [ "/usr/bin/tini", "--" ]
+CMD [ "/bin/bash" ]
