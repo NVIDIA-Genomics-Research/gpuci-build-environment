@@ -18,6 +18,7 @@ FROM ${FROM_IMAGE}:${CUDA_VER}-${IMAGE_TYPE}-${LINUX_VERSION}
 # Capture argument used for FROM
 ARG CC_VERSION=7
 ARG PYTHON_VERSION=3.6
+ARG CUDA_VER
 
 # Update environment for gcc/g++ builds
 ENV CC=/usr/bin/gcc
@@ -70,6 +71,7 @@ RUN source activate base \
       -c defaults \
       -c gpuci \
       -c bioconda \
+      cudatoolkit=${CUDA_VER} \
       git \
       gpuci-tools \
       htslib \
