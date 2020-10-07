@@ -9,15 +9,15 @@
 #
 
 ARG FROM_IMAGE=gpuci/miniconda-cuda
-ARG CUDA_VERSION=10.1
+ARG CUDA_VER=10.1
 ARG LINUX_VERSION=ubuntu18.04
 ARG IMAGE_TYPE=devel
-FROM ${FROM_IMAGE}:${CUDA_VERSION}-${IMAGE_TYPE}-${LINUX_VERSION}
+FROM ${FROM_IMAGE}:${CUDA_VER}-${IMAGE_TYPE}-${LINUX_VERSION}
 
 ARG CC_VERSION=7
 ARG PYTHON_VERSION=3.6
 # Capture argument used for FROM
-ARG CUDA_VERSION
+ARG CUDA_VER
 
 # Update environment for gcc/g++ builds
 ENV CC=/usr/bin/gcc
@@ -70,7 +70,7 @@ RUN source activate base \
       -c defaults \
       -c gpuci \
       -c bioconda \
-      cudatoolkit=${CUDA_VERSION} \
+      cudatoolkit=${CUDA_VER} \
       git \
       gpuci-tools \
       htslib \
