@@ -8,23 +8,82 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 #
 
-ARG FROM_IMAGE=gpuci/clara-genomics-base
-ARG CUDA_VER=9.2
+ARG FROM_IMAGE=gpuci/miniconda-cuda-driver
+ARG CUDA_VERSION=10.1
 ARG LINUX_VERSION=ubuntu16.04
+ARG IMAGE_TYPE=devel
+FROM ${FROM_IMAGE}:${CUDA_VERSION}-${IMAGE_TYPE}-${LINUX_VERSION}
+
 ARG CC_VERSION=5
-ARG PYTHON_VERSION=3.6
+ARG PYTHON_VERSION=3.7
+# Capture argument used for FROM
+ARG CUDA_VERSION
 
-FROM ${FROM_IMAGE}:cuda${CUDA_VER}-${LINUX_VERSION}-gcc${CC_VERSION}-py${PYTHON_VERSION}
+# Update environment for gcc/g++ builds
+ENV CC=/usr/bin/gcc
+ENV CXX=/usr/bin/g++
+ENV CUDAHOSTCXX=/usr/bin/g++
+ENV CUDA_HOME=/usr/local/cuda
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/lib
 
-# Installs cuda-drivers and cuda libraries for conda builds on CPU-only machines
+# Enables "source activate conda"
+SHELL ["/bin/bash", "-c"]
 
-# Required arguments
-ARG DRIVER_VER="440"
-
-# Update and add pkgs
-RUN apt-get update -q \
-    && apt-get -qq install apt-utils -y --no-install-recommends \
-      nvidia-headless-${DRIVER_VER} \
-      libnvidia-compute-${DRIVER_VER} \
+RUN apt update && \
+    apt-get -y install  vim \
+    # Install gcc version
+    g++-${CC_VERSION} \
+    gcc-${CC_VERSION} \
+    cmake \
+    make \
+    # Install the packages needed to build with.
+    # Install htslib dependencies
+    wget \
+    tabix \
+    zlib1g-dev \
+    libbz2-dev \
+    liblzma-dev \
+    libcurl4-gnutls-dev \
+    # VariantWorks `cyvcf2` dependency
+    libssl-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${CC_VERSION} 1000 --slave /usr/bin/g++ g++ /usr/bin/g++-${CC_VERSION}
+
+# Add a condarc for channels and override settings
+RUN echo -e "\
+ssl_verify: False \n\
+channels: \n\
+  - gpuci \n\
+  - conda-forge \n\
+  - nvidia \n\
+  - defaults \n" > /conda/.condarc \
+      && cat /conda/.condarc ;
+
+# Create parabricks conda env and make default
+RUN source activate base \
+    && conda install -y gpuci-tools \
+    && gpuci_conda_retry create --no-default-packages --override-channels -n parabricks \
+      -c nvidia \
+      -c conda-forge \
+      -c defaults \
+      -c gpuci \
+      -c bioconda \
+      cudatoolkit=${CUDA_VERSION} \
+      git \
+      gpuci-tools \
+      htslib \
+      python=${PYTHON_VERSION} \
+      "setuptools<50" \
+    && sed -i 's/conda activate base/conda activate parabricks/g' ~/.bashrc ;
+
+# ADD source dest
+# Create symlink for old scripts expecting `gdf` conda env
+RUN ln -s /opt/conda/envs/parabricks /opt/conda/envs/gdf
+
+# Clean up pkgs to reduce image size
+RUN conda clean -afy && chmod -R ugo+w /opt/conda
+
+ENTRYPOINT [ "/usr/bin/tini", "--" ]
+CMD [ "/bin/bash" ]

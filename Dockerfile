@@ -9,16 +9,15 @@
 #
 
 ARG FROM_IMAGE=gpuci/miniconda-cuda
-ARG CUDA_VER=10.1 
+ARG CUDA_VERSION=10.1
 ARG LINUX_VERSION=ubuntu18.04
 ARG IMAGE_TYPE=devel
+FROM ${FROM_IMAGE}:${CUDA_VERSION}-${IMAGE_TYPE}-${LINUX_VERSION}
 
-FROM ${FROM_IMAGE}:${CUDA_VER}-${IMAGE_TYPE}-${LINUX_VERSION}
-
-# Capture argument used for FROM
 ARG CC_VERSION=7
 ARG PYTHON_VERSION=3.6
-ARG CUDA_VER
+# Capture argument used for FROM
+ARG CUDA_VERSION
 
 # Update environment for gcc/g++ builds
 ENV CC=/usr/bin/gcc
@@ -49,7 +48,7 @@ RUN apt update && \
     libssl-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-    
+
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${CC_VERSION} 1000 --slave /usr/bin/g++ g++ /usr/bin/g++-${CC_VERSION}
 
 # Add a condarc for channels and override settings
@@ -71,7 +70,7 @@ RUN source activate base \
       -c defaults \
       -c gpuci \
       -c bioconda \
-      cudatoolkit=${CUDA_VER} \
+      cudatoolkit=${CUDA_VERSION} \
       git \
       gpuci-tools \
       htslib \
