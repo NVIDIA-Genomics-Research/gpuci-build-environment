@@ -70,6 +70,7 @@ RUN source activate base \
       -c defaults \
       -c gpuci \
       -c bioconda \
+      autoconf \
       cudatoolkit=${CUDA_VER} \
       git \
       gpuci-tools \

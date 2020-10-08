@@ -9,7 +9,7 @@
 #
 
 ARG FROM_IMAGE=gpuci/miniconda-cuda-driver
-ARG CUDA_VER=9.2
+ARG CUDA_VER=10.1
 ARG LINUX_VERSION=ubuntu16.04
 ARG IMAGE_TYPE=devel
 FROM ${FROM_IMAGE}:${CUDA_VER}-${IMAGE_TYPE}-${LINUX_VERSION}
@@ -70,6 +70,7 @@ RUN source activate base \
       -c defaults \
       -c gpuci \
       -c bioconda \
+      autoconf \
       cudatoolkit=${CUDA_VER} \
       git \
       gpuci-tools \
