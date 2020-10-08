@@ -76,6 +76,7 @@ RUN source activate base \
       gpuci-tools \
       htslib \
       python=${PYTHON_VERSION} \
+      rsync \
       "setuptools<50" \
     && sed -i 's/conda activate base/conda activate parabricks/g' ~/.bashrc ;
 
