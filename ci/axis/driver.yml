@@ -1,6 +1,3 @@
-BUILD_IMAGE:
-  - gpuci/clara-genomics-base-driver-test
-
 CC_VERSION:
   - 5
 

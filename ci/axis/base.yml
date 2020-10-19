@@ -1,6 +1,3 @@
-BUILD_IMAGE:
-  - gpuci/clara-genomics-base-test
-
 CC_VERSION:
   - 5
   - 7
@@ -27,7 +24,6 @@ PYTHON_VERSION:
   - 3.7
 
 exclude:
-  #Cuda/linux excludes
   - CUDA_VER: 9.0
     LINUX_VER: ubuntu18.04
   - CUDA_VER: 9.0
@@ -46,7 +42,6 @@ exclude:
     LINUX_VER: centos8
   - CUDA_VER: 10.0
     LINUX_VER: centos8
-  # CC/Linux excludes
   - LINUX_VER: ubuntu16.04
     CC_VERSION: 7
   - LINUX_VER: ubuntu18.04
