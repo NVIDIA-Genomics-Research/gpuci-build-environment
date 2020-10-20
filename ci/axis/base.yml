@@ -16,7 +16,7 @@ LINUX_VERSION:
   - ubuntu18.04
   - ubuntu20.04
   - centos7
-  - centos8
+  # - centos8
 
 PYTHON_VERSION:
   - 3.5
@@ -36,12 +36,12 @@ exclude:
     LINUX_VERSION: ubuntu20.04
   - CUDA_VER: 10.2
     LINUX_VERSION: ubuntu20.04
-  - CUDA_VER: 9.0
-    LINUX_VERSION: centos8
-  - CUDA_VER: 9.2
-    LINUX_VERSION: centos8
-  - CUDA_VER: 10.0
-    LINUX_VERSION: centos8
+  # - CUDA_VER: 9.0
+  #   LINUX_VERSION: centos8
+  # - CUDA_VER: 9.2
+  #   LINUX_VERSION: centos8
+  # - CUDA_VER: 10.0
+  #   LINUX_VERSION: centos8
   - LINUX_VERSION: ubuntu16.04
     CC_VERSION: 7
   - LINUX_VERSION: ubuntu18.04
@@ -50,5 +50,5 @@ exclude:
     CC_VERSION: 5
   - LINUX_VERSION: centos7
     CC_VERSION: 5
-  - LINUX_VERSION: centos8
-    CC_VERSION: 5
+  # - LINUX_VERSION: centos8
+  #   CC_VERSION: 5
