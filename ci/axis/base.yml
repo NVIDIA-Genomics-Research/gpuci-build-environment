@@ -1,6 +1,7 @@
 CC_VERSION:
   - 5
   - 7
+  - 9
 
 CUDA_VER:
   - 9.0
@@ -52,3 +53,11 @@ exclude:
     CC_VERSION: 5
   # - LINUX_VERSION: centos8
   #   CC_VERSION: 5
+  - LINUX_VERSION: ubuntu16.04
+    CC_VERSION: 9
+  - LINUX_VERSION: ubuntu18.04
+    CC_VERSION: 9
+  - LINUX_VERSION: centos7
+    CC_VERSION: 9
+  # - LINUX_VERSION: centos8
+    # CC_VERSION: 9
