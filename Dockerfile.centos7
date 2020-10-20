@@ -10,8 +10,9 @@
 
 ARG FROM_IMAGE=gpuci/miniconda-cuda
 ARG CUDA_VER=10.0
+ARG LINUX_VERSION=centos7
 ARG IMAGE_TYPE=devel
-FROM ${FROM_IMAGE}:${CUDA_VER}-${IMAGE_TYPE}-centos7
+FROM ${FROM_IMAGE}:${CUDA_VER}-${IMAGE_TYPE}-${LINUX_VERSION}
 
 # Capture arguments used for FROM
 ARG CUDA_VER
