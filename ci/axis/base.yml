@@ -20,7 +20,6 @@ LINUX_VERSION:
   # - centos8
 
 PYTHON_VERSION:
-  - 3.5
   - 3.6
   - 3.7
 
