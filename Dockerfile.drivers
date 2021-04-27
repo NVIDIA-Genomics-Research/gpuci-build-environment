@@ -46,6 +46,8 @@ RUN apt update && \
     libcurl4-gnutls-dev \
     # VariantWorks `cyvcf2` dependency
     libssl-dev \
+    # samtools dependencies
+    libncurses5-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -79,6 +81,12 @@ RUN source activate base \
       rsync \
       "setuptools<50" \
     && sed -i 's/conda activate base/conda activate parabricks/g' ~/.bashrc ;
+
+# Install samtools
+RUN wget https://github.com/samtools/samtools/releases/download/1.12/samtools-1.12.tar.bz2 && \
+    tar -xf samtools-1.12.tar.bz2  && \
+    cd  samtools-1.12 && \
+    ./configure && make && make install
 
 # ADD source dest
 # Create symlink for old scripts expecting `gdf` conda env

@@ -45,7 +45,9 @@ RUN yum -y install rpm-build \
         # VariantWorks `cyvcf2` dependency
         libssl-dev \
         # cmake3 dependency
-        openssl-devel
+        openssl-devel \
+        # samtools dependency
+        ncurses-devel
 
 # Add a condarc for channels and override settings
 RUN echo -e "\
@@ -74,7 +76,7 @@ RUN source activate base \
       python=${PYTHON_VERSION} \
       rsync \
       "setuptools<50" \
-    && sed -i 's/conda activate base/conda activate parabricks/g' ~/.bashrc
+      && sed -i 's/conda activate base/conda activate parabricks/g' ~/.bashrc
 
 # Install gcc7 from prebuilt tarball
 RUN gpuci_retry wget --quiet ${CENTOS7_GCC7_URL} -O /gcc7.tgz \
@@ -89,6 +91,12 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.3/cmake-3.18.3
     && ./bootstrap --prefix=/usr/local \
     && make -j16 \
     && make install
+
+# Install samtools
+RUN wget https://github.com/samtools/samtools/releases/download/1.12/samtools-1.12.tar.bz2 && \
+    tar -xf samtools-1.12.tar.bz2  && \
+    cd  samtools-1.12 && \
+    ./configure && make && make install
 
 # Create symlink for old scripts expecting `gdf` conda env
 RUN ln -s /opt/conda/envs/parabricks /opt/conda/envs/gdf
