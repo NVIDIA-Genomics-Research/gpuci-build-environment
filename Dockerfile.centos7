@@ -76,6 +76,12 @@ RUN source activate base \
       "setuptools<50" \
     && sed -i 's/conda activate base/conda activate parabricks/g' ~/.bashrc
 
+# Install samtools
+RUN wget https://github.com/samtools/samtools/releases/download/1.12/samtools-1.12.tar.bz2 && \
+    tar -xf samtools-1.12.tar.bz2  && \
+    cd  samtools-1.12 && \
+    ./configure && make && make install
+
 # Install gcc7 from prebuilt tarball
 RUN gpuci_retry wget --quiet ${CENTOS7_GCC7_URL} -O /gcc7.tgz \
     && tar xzvf /gcc7.tgz \
