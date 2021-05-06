@@ -20,9 +20,9 @@ LINUX_VERSION:
   # - centos8
 
 PYTHON_VERSION:
-  - 3.5
   - 3.6
   - 3.7
+  - 3.8
 
 exclude:
   - CUDA_VER: 9.0

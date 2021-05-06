@@ -12,8 +12,8 @@ LINUX_VERSION:
   - ubuntu16.04
 
 PYTHON_VERSION:
-  - 3.5
   - 3.6
   - 3.7
+  - 3.8
 
 exclude: {}
