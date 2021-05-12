@@ -65,30 +65,29 @@ channels: \n\
 
 # Create parabricks conda env and make default
 RUN source activate base \
-    && conda update conda \
-    && conda install -y -c gpuci  gpuci-tools \
-    && gpuci_conda_retry create --no-default-packages --override-channels -c conda-forge -n parabricks python=${PYTHON_VERSION} \
-    && source activate parabricks \
-    && gpuci_conda_retry install -c conda-forge autoconf \
-    && gpuci_conda_retry install -c nvidia cudatoolkit=${CUDA_VER} \
-    && gpuci_conda_retry install -c conda-forge git \
-    # && gpuci_conda_retry install -c gpuci gpuci-tools \
-    && gpuci_conda_retry install -c conda-forge rsync \
-    && gpuci_conda_retry install -c conda-forge "setuptools<50" \
-#     && gpuci_conda_retry create --no-default-packages --override-channels -n parabricks \
-#       -c nvidia \
-#       -c conda-forge \
-#       -c defaults \
-#       -c gpuci \
-#       -c bioconda \
-#       autoconf \
-#       cudatoolkit=${CUDA_VER} \
-#       git \
-#       gpuci-tools \
-# #      htslib \
-#       python=${PYTHON_VERSION} \
-#       rsync \
-#       setuptools \
+    # && conda update conda \
+    # && conda install -y -c gpuci  gpuci-tools \
+    # && gpuci_conda_retry create --no-default-packages --override-channels -c conda-forge -n parabricks python=${PYTHON_VERSION} \
+    # && source activate parabricks \
+    # && gpuci_conda_retry install -c conda-forge autoconf \
+    # && gpuci_conda_retry install -c nvidia cudatoolkit=${CUDA_VER} \
+    # && gpuci_conda_retry install -c conda-forge git \
+    # && gpuci_conda_retry install -c conda-forge rsync \
+    # && gpuci_conda_retry install -c conda-forge "setuptools<50" \
+    && conda create --no-default-packages --override-channels -n parabricks \
+      -c nvidia \
+      -c conda-forge \
+      -c defaults \
+    #   -c gpuci \
+      -c bioconda \
+      autoconf \
+      cudatoolkit=${CUDA_VER} \
+      git \
+    #   gpuci-tools \
+#      htslib \
+      python=${PYTHON_VERSION} \
+      rsync \
+      setuptools \
     && sed -i 's/conda activate base/conda activate parabricks/g' ~/.bashrc ;
 
 
