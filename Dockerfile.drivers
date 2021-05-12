@@ -76,7 +76,7 @@ RUN source activate base \
       cudatoolkit=${CUDA_VER} \
       git \
       gpuci-tools \
-      htslib \
+#      htslib \
       python=${PYTHON_VERSION} \
       rsync \
       "setuptools<50" \
@@ -87,6 +87,9 @@ RUN wget https://github.com/samtools/samtools/releases/download/1.12/samtools-1.
     tar -xf samtools-1.12.tar.bz2  && \
     cd  samtools-1.12 && \
     ./configure && make && make install
+
+# Install htslib
+RUN wget https://github.com/samtools/htslib/releases/download/1.12/htslib-1.12.tar.bz2 && tar -xf htslib-1.12.tar.bz2 &&cd htslib-1.12 && make && make install
 
 # ADD source dest
 # Create symlink for old scripts expecting `gdf` conda env
