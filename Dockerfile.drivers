@@ -65,6 +65,7 @@ channels: \n\
 
 # Create parabricks conda env and make default
 RUN source activate base \
+    && conda update conda \
     && conda install -y -c gpuci  gpuci-tools \
     && gpuci_conda_retry create --no-default-packages --override-channels -c conda-forge -n parabricks python=${PYTHON_VERSION} \
     && source activate parabricks \
