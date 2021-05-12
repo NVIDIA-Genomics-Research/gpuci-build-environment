@@ -65,13 +65,13 @@ channels: \n\
 
 # Create parabricks conda env and make default
 RUN source activate base \
-    && conda install -y gpuci-tools \
+    && conda install -y -c gpuci  gpuci-tools \
     && gpuci_conda_retry create --no-default-packages --override-channels -c conda-forge -n parabricks python=${PYTHON_VERSION} \
     && source activate parabricks \
     && gpuci_conda_retry install -c conda-forge autoconf \
     && gpuci_conda_retry install -c nvidia cudatoolkit=${CUDA_VER} \
     && gpuci_conda_retry install -c conda-forge git \
-    && gpuci_conda_retry install -c gpuci gpuci-tools \
+    # && gpuci_conda_retry install -c gpuci gpuci-tools \
     && gpuci_conda_retry install -c conda-forge rsync \
     && gpuci_conda_retry install -c conda-forge "setuptools<50" \
 #     && gpuci_conda_retry create --no-default-packages --override-channels -n parabricks \
