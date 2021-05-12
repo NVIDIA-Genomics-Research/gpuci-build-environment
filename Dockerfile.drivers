@@ -79,7 +79,7 @@ RUN source activate base \
 #      htslib \
       python=${PYTHON_VERSION} \
       rsync \
-      "setuptools<50" \
+      setuptools \
     && sed -i 's/conda activate base/conda activate parabricks/g' ~/.bashrc ;
 
 # Install samtools
